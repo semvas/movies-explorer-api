@@ -9,12 +9,6 @@ const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
 
-const getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => res.send({ data: users }))
-    .catch(next);
-};
-
 const getUserById = (req, res, next) => {
   User.findById(req.params.id)
     .orFail(new NotFoundError('Пользователь по указанному id не найден'))
@@ -28,15 +22,17 @@ const getUserById = (req, res, next) => {
 };
 
 const createUser = (req, res, next) => {
-  const {
-    name, about, avatar, email, password,
-  } = req.body;
+  const { name, email, password } = req.body;
 
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
-      name, about, avatar, email, password: hash,
+      name, email, password: hash,
     }))
-    .then((user) => res.send(user))
+    .then((user) => res.send({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    }))
     .catch((err) => {
       if (err.name === 'MongoError' && err.code === 11000) {
         throw new ConflictError('Указанный адрес почты уже используется');
@@ -50,11 +46,11 @@ const createUser = (req, res, next) => {
 };
 
 const updateUser = (req, res, next) => {
-  const { name, about } = req.body;
+  const { name, email } = req.body;
 
   User.findByIdAndUpdate(
     req.user._id,
-    { name, about },
+    { name, email },
     {
       new: true,
       runValidators: true,
@@ -68,31 +64,6 @@ const updateUser = (req, res, next) => {
       }
       if (err.name === 'ValidationError') {
         throw new BadRequestError('Неверено задано одно из полей');
-      }
-      next(err);
-    })
-    .catch(next);
-};
-
-const updateAvatar = (req, res, next) => {
-  const { avatar } = req.body;
-
-  User.findByIdAndUpdate(
-    req.user._id,
-    { avatar },
-    {
-      new: true,
-      runValidators: true,
-    },
-  )
-    .orFail(new NotFoundError('Пользователь по указанному id не найден'))
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequestError('Передан некорректный id');
-      }
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Ошибка в ссылке на новый аватар');
       }
       next(err);
     })
@@ -115,24 +86,9 @@ const login = (req, res, next) => {
     .catch(next);
 };
 
-const getUserInfo = (req, res, next) => {
-  User.findById(req.user._id)
-    .orFail(new NotFoundError('Пользователь по указанному id не найден'))
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequestError('Передан некорректный id');
-      }
-      next(err);
-    });
-};
-
 module.exports = {
-  getUsers,
   getUserById,
   createUser,
   updateUser,
-  updateAvatar,
   login,
-  getUserInfo,
 };

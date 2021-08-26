@@ -4,7 +4,7 @@ const { isURL, isEmail } = require('validator');
 const validateId = celebrate({
   params: Joi.object().keys({
     id: Joi.string().hex().length(24),
-    cardId: Joi.string().hex().length(24),
+    movieId: Joi.string().hex().length(24),
   }),
 });
 
@@ -18,14 +18,9 @@ const validateLogin = celebrate({
   }),
 });
 
-const validateUser = celebrate({
+const validateRegister = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-    avatar: Joi.string().custom((value) => {
-      if (!isURL(value)) throw new CelebrateError('Некорректный URL');
-      return value;
-    }),
     email: Joi.string().required().custom((value) => {
       if (!isEmail(value)) throw new CelebrateError('Некорректный Email');
       return value;
@@ -37,34 +32,42 @@ const validateUser = celebrate({
 const validateUserInfo = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
-    about: Joi.string().min(2).max(30).required(),
-  }),
-});
-
-const validateAvatar = celebrate({
-  body: Joi.object().keys({
-    avatar: Joi.string().custom((value) => {
-      if (!isURL(value)) throw new CelebrateError('Некорректный URL');
+    email: Joi.string().required().custom((value) => {
+      if (!isEmail(value)) throw new CelebrateError('Некорректный Email');
       return value;
     }),
   }),
 });
 
-const validateCard = celebrate({
+const validateMovie = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    link: Joi.string().custom((value) => {
+    country: Joi.string().required(),
+    director: Joi.string().required(),
+    duration: Joi.number().required(),
+    year: Joi.string().required(),
+    description: Joi.string().required(),
+    image: Joi.string().custom((value) => {
       if (!isURL(value)) throw new CelebrateError('Некорректный URL');
       return value;
     }),
+    trailer: Joi.string().custom((value) => {
+      if (!isURL(value)) throw new CelebrateError('Некорректный URL');
+      return value;
+    }),
+    thumbnail: Joi.string().custom((value) => {
+      if (!isURL(value)) throw new CelebrateError('Некорректный URL');
+      return value;
+    }),
+    movieId: Joi.number().required(),
+    nameRU: Joi.string().required(),
+    nameEN: Joi.string().required(),
   }),
 });
 
 module.exports = {
   validateId,
   validateLogin,
-  validateUser,
+  validateRegister,
   validateUserInfo,
-  validateAvatar,
-  validateCard,
+  validateMovie,
 };
