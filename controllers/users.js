@@ -10,7 +10,7 @@ const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
 
 const getUserById = (req, res, next) => {
-  User.findById(req.params.id)
+  User.findById(req.user._id)
     .orFail(new NotFoundError('Пользователь по указанному id не найден'))
     .then((user) => res.send(user))
     .catch((err) => {
