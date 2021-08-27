@@ -65,6 +65,9 @@ const updateUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         throw new BadRequestError('Неверено задано одно из полей');
       }
+      if (err.name === 'MongoError' && err.code === 11000) {
+        throw new ConflictError('Указанный адрес почты уже используется');
+      }
       next(err);
     })
     .catch(next);
