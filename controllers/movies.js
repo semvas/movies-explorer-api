@@ -5,8 +5,13 @@ const BadRequestError = require('../errors/BadRequestError');
 const ForbiddenError = require('../errors/ForbiddenError');
 
 const getMovies = (req, res, next) => {
-  Movie.find({})
-    .then((movies) => res.send(movies))
+  Movie.find({ owner: req.user._id })
+    .then((movies) => {
+      if (!movies) {
+        throw new NotFoundError('Фильмы не найдены');
+      }
+      res.send(movies);
+    })
     .catch(next);
 };
 
