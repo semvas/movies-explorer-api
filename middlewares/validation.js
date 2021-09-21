@@ -46,18 +46,12 @@ const validateMovie = celebrate({
     duration: Joi.number().required(),
     year: Joi.string().required(),
     description: Joi.string().required(),
-    image: Joi.string().custom((value) => {
-      if (!isURL(value)) throw new CelebrateError('Некорректный URL');
-      return value;
-    }),
+    image: Joi.object(),
     trailer: Joi.string().custom((value) => {
       if (!isURL(value)) throw new CelebrateError('Некорректный URL');
       return value;
     }),
-    thumbnail: Joi.string().custom((value) => {
-      if (!isURL(value)) throw new CelebrateError('Некорректный URL');
-      return value;
-    }),
+    thumbnail: Joi.string(),
     movieId: Joi.number().required(),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
